@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coach d'anglais vocal</title>
+<style>
+  :root{
+    --bg:#f6f7f4; --card:#ffffff; --ink:#1d2421; --muted:#68736d; --line:#e2e6e1;
+    --green:#0f7a4a; --green-soft:#e3f2ea; --red:#c8372d; --red-soft:#fbe9e7;
+    --yellow:#e8b100; --yellow-soft:#fff6d6; --blue:#2c5d9e; --blue-soft:#e6eef9;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--ink);
+       display:flex;flex-direction:column;font-size:16px;line-height:1.45}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);
+         border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;margin:0;display:flex;align-items:center;gap:8px}
+  header .flag{display:inline-flex;width:18px;height:12px;border-radius:2px;overflow:hidden}
+  header .flag i{flex:1}
+  header .actions{display:flex;gap:6px}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);
+         border-radius:10px;padding:7px 12px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.primary{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+  main{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;max-width:760px;width:100%;margin:0 auto}
+  .welcome{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;color:var(--muted);font-size:15px}
+  .welcome b{color:var(--ink)}
+  .welcome ol{margin:6px 0 0;padding-left:20px}
+  .msg{max-width:88%;padding:10px 14px;border-radius:var(--radius);position:relative;word-wrap:break-word}
+  .msg.user{align-self:flex-end;background:var(--green);color:#fff;border-bottom-right-radius:4px}
+  .msg.tutor{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg .who{font-size:12px;opacity:.75;margin-bottom:2px;font-weight:600}
+  .msg.tutor .text.hidden-text{filter:blur(6px);user-select:none;cursor:pointer}
+  .msg .fr{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);color:var(--muted);font-size:14px;font-style:italic}
+  .tools{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .tools button{padding:3px 9px;font-size:13px;border-radius:8px}
+  .corr-wrap{align-self:flex-end;max-width:88%;display:flex;flex-direction:column;gap:6px}
+  .corr{background:var(--red-soft);border:1px solid #f1c5bf;border-radius:12px;padding:8px 12px;font-size:14px}
+  .corr .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+             color:var(--red);margin-bottom:3px}
+  .corr.pron{background:var(--blue-soft);border-color:#c5d6ef}.corr.pron .tag{color:var(--blue)}
+  .corr .line s{color:var(--red)}
+  .corr .line b{color:var(--green)}
+  .corr .why{color:#4a4f4c;margin-top:3px}
+  .ok{background:var(--green-soft);border:1px solid #bfe0cd;color:var(--green);border-radius:12px;padding:6px 12px;font-size:14px}
+  .err{align-self:center;background:var(--yellow-soft);border:1px solid #f0dc94;border-radius:12px;padding:8px 12px;font-size:14px;max-width:92%}
+  footer{background:var(--card);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .footer-in{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+  #status{font-size:13px;color:var(--muted);text-align:center;min-height:18px}
+  .bar{display:flex;align-items:center;gap:10px}
+  #textInput{flex:1;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);min-width:0}
+  #micBtn{width:64px;height:64px;border-radius:50%;border:none;background:var(--green);color:#fff;font-size:28px;flex:none;
+          box-shadow:0 3px 10px rgba(15,122,74,.35);display:flex;align-items:center;justify-content:center;padding:0}
+  #micBtn.rec{background:var(--red);animation:pulse 1.2s infinite}
+  #micBtn.busy{background:#9aa39e;box-shadow:none}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,55,45,.5)}70%{box-shadow:0 0 0 16px rgba(200,55,45,0)}100%{box-shadow:0 0 0 0 rgba(200,55,45,0)}}
+  .overlay{position:fixed;inset:0;background:rgba(20,25,22,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+  .overlay.hidden{display:none}
+  .sheet{background:var(--card);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px 18px 26px}
+  @media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:20px}}
+  .sheet h2{margin:0 0 12px;font-size:19px;display:flex;justify-content:space-between;align-items:center}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+  .field .hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .field input[type=text],.field input[type=password],.field select{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+  .row{display:flex;gap:8px;align-items:center}
+  .row > *{flex:1}
+  .check{display:flex;align-items:center;gap:8px;font-size:15px;margin-bottom:8px}
+  .check input{width:18px;height:18px}
+  .recap h3{font-size:15px;margin:16px 0 6px;color:var(--green)}
+  .recap ul{margin:0;padding-left:20px}
+  .recap li{margin-bottom:5px}
+  .recap details{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+  .recap summary{cursor:pointer}
+  a{color:var(--green)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="flag"><i style="background:#0f7a4a"></i><i style="background:#c8372d"></i><i style="background:#e8b100"></i></span> Coach d'anglais</h1>
+  <div class="actions">
+    <button id="recapBtn" title="Bilan de la séance">📋 Bilan</button>
+    <button id="settingsBtn" title="Réglages">⚙️</button>
+  </div>
+</header>
+
+<main id="chat">
+  <div class="welcome" id="welcome">
+    <b>Bienvenue !</b> Votre coach parle anglais avec vous et vous corrige comme un enseignant.
+    <ol>
+      <li>Ouvrez <b>⚙️ Réglages</b>, collez votre clé d'API Gemini et touchez <b>Charger les modèles</b>.</li>
+      <li>Choisissez votre niveau et une situation, puis <b>Commencer la séance</b>.</li>
+      <li>Touchez 🎙️, parlez, puis touchez de nouveau pour envoyer. Sur ordinateur, vous pouvez aussi utiliser la <b>barre d'espace</b>.</li>
+      <li>À la fin, touchez <b>📋 Bilan</b> pour voir vos erreurs récurrentes et des exercices.</li>
+    </ol>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-in">
+    <div id="status">Prêt.</div>
+    <div class="bar">
+      <input id="textInput" type="text" placeholder="…ou écrivez en anglais ici" autocomplete="off">
+      <button id="sendBtn" title="Envoyer le texte">➤</button>
+      <button id="micBtn" title="Parler (barre d'espace)">🎙️</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Réglages -->
+<div class="overlay hidden" id="settingsOverlay">
+  <div class="sheet">
+    <h2>Réglages <button id="closeSettings">✕</button></h2>
+
+    <div class="field">
+      <label for="apiKey">Clé d'API Gemini</label>
+      <input id="apiKey" type="password" placeholder="AIza…" autocomplete="off">
+      <div class="hint">Gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Elle reste enregistrée uniquement sur cet appareil.</div>
+    </div>
+
+    <div class="field">
+      <label for="model">Modèle</label>
+      <div class="row">
+        <select id="model"><option value="gemini-flash-latest">gemini-flash-latest</option></select>
+        <button id="loadModels" style="flex:none">Charger les modèles</button>
+      </div>
+      <div class="hint">« Charger les modèles » teste automatiquement les modèles et garde le plus rapide qui répond.</div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="level">Mon niveau</label>
+        <select id="level">
+          <option value="A1">A1 — Débutant</option>
+          <option value="A2">A2 — Élémentaire</option>
+          <option value="B1" selected>B1 — Intermédiaire</option>
+          <option value="B2">B2 — Avancé</option>
+          <option value="C1">C1 — Autonome</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="scenario">Situation</label>
+        <select id="scenario"></select>
+      </div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="strict"> Mode strict : le coach me fait répéter la phrase corrigée</label>
+    <label class="check"><input type="checkbox" id="showText" checked> Afficher le texte du coach (décochez pour travailler l'écoute)</label>
+
+    <div class="row">
+      <div class="field">
+        <label for="voiceMode">Type de voix</label>
+        <select id="voiceMode">
+          <option value="gemini">Gemini — naturelle (recommandée)</option>
+          <option value="browser">Navigateur — gratuite, plus robotique</option>
+        </select>
+      </div>
+      <div class="field" id="gvoiceField">
+        <label for="gvoice">Voix Gemini</label>
+        <select id="gvoice">
+          <option value="Kore">Kore — femme, claire</option>
+          <option value="Aoede">Aoede — femme, douce</option>
+          <option value="Leda">Leda — femme, jeune</option>
+          <option value="Zephyr">Zephyr — femme, lumineuse</option>
+          <option value="Puck">Puck — homme, enjoué</option>
+          <option value="Charon">Charon — homme, posé</option>
+          <option value="Orus">Orus — homme, ferme</option>
+          <option value="Fenrir">Fenrir — homme, dynamique</option>
+        </select>
+        <button id="testVoice" style="margin-top:6px;font-size:13px;padding:4px 10px">🔊 Essayer cette voix</button>
+      </div>
+    </div>
+
+    <div class="row" id="browserVoiceRow">
+      <div class="field">
+        <label for="voice">Voix du navigateur</label>
+        <select id="voice"></select>
+        <div class="hint" id="voiceHint"></div>
+      </div>
+      <div class="field">
+        <label for="rate">Vitesse : <span id="rateVal">0.95</span></label>
+        <input id="rate" type="range" min="0.6" max="1.2" step="0.05" value="0.95" style="width:100%">
+      </div>
+    </div>
+
+    <div id="setupStatus" style="font-size:14px;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:var(--bg);display:none"></div>
+    <button class="primary" id="startBtn" style="width:100%;padding:12px">▶ Commencer la séance</button>
+  </div>
+</div>
+
+<!-- Bilan -->
+<div class="overlay hidden" id="recapOverlay">
+  <div class="sheet">
+    <h2>Bilan de la séance <button id="closeRecap">✕</button></h2>
+    <div id="recapBody" class="recap"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Coach d'anglais vocal — prototype v1
+   Voix -> Gemini (audio direct) -> réponse + corrections -> synthèse vocale
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- Stockage local (sûr) ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('coach_' + k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('coach_' + k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- Situations (jeux de rôle) ---------- */
+const SCENARIOS = {
+  free:      { label:"Conversation libre",
+               prompt:"Free conversation. You are a friendly conversation partner. Ask about the learner's daily life, work, family, interests, opinions and current events. Keep the conversation flowing naturally." },
+  colleague: { label:"Collègue anglophone (Bamenda)",
+               prompt:"Role-play: you are Mr. Ndi, an English-speaking teacher from Bamenda who has just joined the learner's school. Chat as colleagues in the staff room: classes, students, exams, timetables, life in the town." },
+  market:    { label:"Au marché (Yaoundé)",
+               prompt:"Role-play: you are a lively trader at Mfoundi market in Yaoundé who speaks English. The learner wants to buy food and household items. Give prices in CFA francs and let the learner bargain politely." },
+  taxi:      { label:"En taxi (Douala)",
+               prompt:"Role-play: you are a talkative taxi driver in Douala who speaks English. The learner gets in, gives a destination, negotiates the fare and chats during the ride (traffic, weather, football)." },
+  interview: { label:"Entretien d'embauche (enseignant au Canada)",
+               prompt:"Role-play: you are a school principal in Canada interviewing the learner for a teaching position (computer science). Ask typical interview questions one at a time: experience, teaching methods, classroom management, motivation, strengths and weaknesses." },
+  airport:   { label:"À l'aéroport",
+               prompt:"Role-play: you are first a check-in agent, then an immigration officer at an international airport. Ask for documents, luggage details, purpose and length of the trip, and where the learner will stay." },
+  restaurant:{ label:"Au restaurant",
+               prompt:"Role-play: you are a waiter in a restaurant in London. Greet the learner, present the menu, take the order, handle a small problem (a dish is not available), then bring the bill." },
+  doctor:    { label:"Chez le médecin",
+               prompt:"Role-play: you are a doctor in an English-speaking clinic. The learner describes simple symptoms (headache, fever, cough). Ask questions and give simple advice. Keep it light and fictional." }
+};
+
+const LEVELS = {
+  A1:"A1 (beginner): use very simple, common words and short sentences (max 10 words). Mostly present tense. Speak as to a beginner.",
+  A2:"A2 (elementary): simple everyday vocabulary, short sentences, present, past simple and 'going to'.",
+  B1:"B1 (intermediate): natural everyday English, moderate sentence length, common phrasal verbs, avoid rare idioms.",
+  B2:"B2 (upper-intermediate): natural fluent English with some idioms and more complex structures.",
+  C1:"C1 (advanced): speak like a native speaker, with idioms, nuance and varied structures."
+};
+
+/* ---------- État ---------- */
+const state = {
+  history: [],          // {role:'user'|'model', text}
+  allCorrections: [],   // toutes les corrections de la séance
+  started: false,
+  busy: false,
+  recording: false,
+  ttsModels: []
+};
+
+/* ---------- Réglages ---------- */
+function fillScenarios(){
+  const sel = $('#scenario');
+  for(const [k, v] of Object.entries(SCENARIOS)){
+    const o = document.createElement('option'); o.value = k; o.textContent = v.label; sel.appendChild(o);
+  }
+}
+function settings(){
+  return {
+    key: $('#apiKey').value.trim(),
+    model: $('#model').value,
+    level: $('#level').value,
+    scenario: $('#scenario').value,
+    strict: $('#strict').checked,
+    showText: $('#showText').checked,
+    voice: $('#voice').value,
+    rate: parseFloat($('#rate').value),
+    voiceMode: $('#voiceMode').value,
+    gvoice: $('#gvoice').value
+  };
+}
+function saveSettings(){
+  const s = settings();
+  store.set('settings', s);
+}
+function loadSettings(){
+  const s = store.get('settings', null);
+  if(!s) return;
+  $('#apiKey').value = s.key || '';
+  if(s.model){
+    if(![...$('#model').options].some(o => o.value === s.model)){
+      const o = document.createElement('option'); o.value = s.model; o.textContent = s.model; $('#model').appendChild(o);
+    }
+    $('#model').value = s.model;
+  }
+  if(s.level) $('#level').value = s.level;
+  if(s.scenario && SCENARIOS[s.scenario]) $('#scenario').value = s.scenario;
+  $('#strict').checked = !!s.strict;
+  $('#showText').checked = s.showText !== false;
+  if(s.rate) { $('#rate').value = s.rate; $('#rateVal').textContent = s.rate; }
+  if(s.voiceMode) $('#voiceMode').value = s.voiceMode;
+  if(s.gvoice) $('#gvoice').value = s.gvoice;
+  state.savedVoice = s.voice;
+}
+
+/* ---------- Liste des modèles Gemini ---------- */
+async function loadModels(){
+  const key = $('#apiKey').value.trim();
+  if(!key){ toast("Collez d'abord votre clé d'API."); return; }
+  const btn = $('#loadModels'); btn.disabled = true; btn.textContent = '…';
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers:{ 'x-goog-api-key': key } });
+    if(!r.ok) throw await apiError(r);
+    const j = await r.json();
+    state.ttsModels = sortTts((j.models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace(/^models\//, '')).filter(n => /tts/.test(n)));
+    store.set('ttsModels', state.ttsModels);
+    let names = (j.models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace(/^models\//, ''))
+      .filter(n => /gemini/.test(n) && !/(tts|image|embed|live|native-audio|robotics|computer-use|veo|imagen|aqa)/.test(n));
+    const rank = n => {
+      const cat = /flash-latest/.test(n) ? -1 : (/flash/.test(n) && !/lite/.test(n)) ? 0 : /lite/.test(n) ? 1 : /pro/.test(n) ? 2 : 3;
+      const ver = parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1]) || 0;
+      const unstable = /(preview|exp)/.test(n) ? 1 : 0;
+      return [cat, -ver, unstable, n];
+    };
+    names.sort((a, b) => { const A = rank(a), B = rank(b); for(let i = 0; i < 4; i++){ if(A[i] < B[i]) return -1; if(A[i] > B[i]) return 1; } return 0; });
+    if(!names.length) throw new Error('Aucun modèle compatible trouvé.');
+    const sel = $('#model'); const prev = sel.value; sel.innerHTML = '';
+    names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+    await autoPickModel(names);
+  }catch(e){
+    setupStatus(friendlyError(e), false);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Charger les modèles';
+  }
+}
+
+function setupStatus(t, ok){
+  const d = $('#setupStatus'); d.style.display = t ? 'block' : 'none'; d.textContent = t;
+  d.style.background = ok === true ? 'var(--green-soft)' : ok === false ? 'var(--yellow-soft)' : 'var(--bg)';
+  setStatus(t);
+}
+/* Essaie les modèles du plus léger au plus lourd et garde le premier qui répond vite */
+async function autoPickModel(names){
+  const order = n => /flash-lite-latest/.test(n) ? 0 : /flash-lite/.test(n) && !/preview/.test(n) ? 1 : /flash-latest/.test(n) ? 2
+                   : /flash/.test(n) && !/(preview|omni)/.test(n) ? 3 : /flash/.test(n) ? 4 : 9;
+  const candidates = names.filter(n => order(n) < 9).sort((a, b) => order(a) - order(b) || names.indexOf(a) - names.indexOf(b)).slice(0, 8);
+  const sel = $('#model');
+  for(const m of candidates){
+    setupStatus('Test du modèle ' + m + '…');
+    sel.value = m;
+    const t0 = Date.now();
+    try{
+      await geminiTest(m);
+      const sec = ((Date.now() - t0) / 1000).toFixed(1);
+      saveSettings();
+      setupStatus('✓ ' + names.length + ' modèles trouvés. Choisi : ' + m + ' (réponse en ' + sec + ' s). Vous pouvez commencer la séance.', true);
+      return;
+    }catch(e){ /* on passe au suivant */ }
+  }
+  setupStatus("Aucun modèle n'a répondu à temps. Vérifiez la connexion (désactivez le VPN), puis réessayez.", false);
+}
+async function geminiTest(model){
+  const s = settings();
+  const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 25000);
+  const body = { contents: [{ role: 'user', parts: [{ text: 'Reply with the single word: ok' }] }], generationConfig: { maxOutputTokens: 20 } };
+  const tc = thinkingFor(model); if(tc) body.generationConfig.thinkingConfig = tc;
+  try{
+    let r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': s.key }, body: JSON.stringify(body), signal: ctrl.signal });
+    if(!r.ok && r.status === 400 && tc){
+      delete body.generationConfig.thinkingConfig;
+      r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': s.key }, body: JSON.stringify(body), signal: ctrl.signal });
+    }
+    if(!r.ok) throw await apiError(r);
+  }finally{ clearTimeout(timer); }
+}
+
+/* ---------- Voix (synthèse vocale) ---------- */
+function populateVoices(){
+  if(!('speechSynthesis' in window)){ $('#voiceHint').textContent = "Synthèse vocale non disponible dans ce navigateur."; return; }
+  const voices = speechSynthesis.getVoices().filter(v => /^en([-_]|$)/i.test(v.lang));
+  const sel = $('#voice'); const prev = sel.value || state.savedVoice; sel.innerHTML = '';
+  const score = v => (/(natural|neural|online|google|premium|enhanced)/i.test(v.name) ? 0 : 1) + (/en[-_](US|GB)/i.test(v.lang) ? 0 : 0.5);
+  voices.sort((a, b) => score(a) - score(b));
+  voices.forEach(v => { const o = document.createElement('option'); o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')'; sel.appendChild(o); });
+  if(!voices.length){
+    const o = document.createElement('option'); o.value = ''; o.textContent = 'Voix par défaut'; sel.appendChild(o);
+    $('#voiceHint').textContent = "Aucune voix anglaise détectée. Sur Ubuntu : sudo apt install speech-dispatcher espeak-ng, puis redémarrez Firefox.";
+  } else {
+    $('#voiceHint').textContent = /linux/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent) && voices.every(v => score(v) >= 1)
+      ? "Les voix d'Ubuntu sont robotiques : l'expérience est plus naturelle sur Android." : "";
+  }
+  if(prev && voices.some(v => v.name === prev)) sel.value = prev;
+}
+function currentVoice(){
+  const name = $('#voice').value;
+  return speechSynthesis.getVoices().find(v => v.name === name) || null;
+}
+/* Voix du navigateur */
+function browserSpeak(text, mode){
+  if(!('speechSynthesis' in window) || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = currentVoice();
+  if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = 'en-US'; }
+  const r = settings().rate;
+  u.rate = mode === 'slow' ? 0.7 : mode === 'clear' ? Math.min(r, 0.85) : r;
+  u.onstart = () => setStatus("🔊 Le coach parle… (touchez 🎙️ pour l'interrompre et répondre)");
+  u.onend = () => { if(!state.busy && !state.recording) setStatus(readyMsg()); };
+  speechSynthesis.speak(u);
+}
+
+/* Voix Gemini (synthèse naturelle) */
+let audioCtx = null, currentSrc = null, speakId = 0;
+const ttsCache = new Map();
+function getAudioCtx(){
+  if(!audioCtx){ const AC = window.AudioContext || window.webkitAudioContext; audioCtx = new AC(); }
+  return audioCtx;
+}
+function unlockAudio(){ try{ const c = getAudioCtx(); if(c.state === 'suspended') c.resume(); }catch(e){} }
+function sortTts(list){
+  const key = n => [/(preview|exp)/.test(n) ? 1 : 0, /lite/.test(n) ? 0 : 1, -(parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1]) || 0)];
+  return list.slice().sort((a, b) => { const A = key(a), B = key(b); for(let i = 0; i < 3; i++){ if(A[i] !== B[i]) return A[i] - B[i]; } return 0; });
+}
+async function ensureTtsModels(){
+  if(state.ttsModels && state.ttsModels.length) return;
+  state.ttsModels = store.get('ttsModels', []);
+  if(state.ttsModels.length) return;
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': settings().key } });
+  if(!r.ok) throw await apiError(r);
+  const j = await r.json();
+  state.ttsModels = sortTts((j.models || []).map(m => m.name.replace(/^models\//, '')).filter(n => /tts/.test(n)));
+  store.set('ttsModels', state.ttsModels);
+}
+function b64ToBytes(b64){
+  const bin = atob(b64); const out = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function audioFromInline(inline){
+  const ctx = getAudioCtx();
+  const bytes = b64ToBytes(inline.data);
+  const mime = inline.mimeType || '';
+  if(/wav|mpeg|mp3|ogg/i.test(mime)) return await ctx.decodeAudioData(bytes.buffer);
+  const rate = parseInt((mime.match(/rate=(\d+)/) || [0, 24000])[1], 10) || 24000;
+  const n = Math.floor(bytes.length / 2);
+  const view = new DataView(bytes.buffer);
+  const buf = ctx.createBuffer(1, Math.max(1, n), rate);
+  const ch = buf.getChannelData(0);
+  for(let i = 0; i < n; i++) ch[i] = view.getInt16(i * 2, true) / 32768;
+  return buf;
+}
+async function geminiTTS(text){
+  const s = settings();
+  await ensureTtsModels();
+  let list = state.ttsModels || [];
+  const saved = store.get('ttsModel', null);
+  if(saved && list.includes(saved)) list = [saved].concat(list.filter(m => m !== saved));
+  if(!list.length) throw new Error('Aucun modèle vocal disponible pour votre clé.');
+  let lastErr = null;
+  for(const m of list.slice(0, 5)){
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 30000);
+    try{
+      const body = {
+        contents: [{ role: 'user', parts: [{ text }] }],
+        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: s.gvoice || 'Kore' } } } }
+      };
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent',
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': s.key }, body: JSON.stringify(body), signal: ctrl.signal });
+      if(!r.ok) throw await apiError(r);
+      const j = await r.json();
+      const part = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || []).find(p => p.inlineData || p.inline_data);
+      if(!part) throw new Error('pas d\'audio dans la réponse');
+      const inline = part.inlineData || part.inline_data;
+      const buf = await audioFromInline({ data: inline.data, mimeType: inline.mimeType || inline.mime_type });
+      store.set('ttsModel', m);
+      return buf;
+    }catch(e){
+      lastErr = (e.name === 'AbortError') ? new Error('TIMEOUT') : e;
+    }finally{ clearTimeout(timer); }
+  }
+  throw lastErr;
+}
+function playBuffer(buf, rate){
+  const ctx = getAudioCtx();
+  if(ctx.state === 'suspended') ctx.resume();
+  const src = ctx.createBufferSource();
+  src.buffer = buf; src.playbackRate.value = rate || 1;
+  src.connect(ctx.destination);
+  src.onended = () => { if(currentSrc === src){ currentSrc = null; if(!state.busy && !state.recording) setStatus(readyMsg()); } };
+  currentSrc = src; src.start();
+  setStatus("🔊 Le coach parle… (touchez 🎙️ pour l'interrompre et répondre)");
+}
+
+/* Point d'entrée unique : mode = undefined (normal), 'slow' ou 'clear' */
+async function speak(text, mode){
+  if(!text) return;
+  stopSpeaking();
+  const myId = ++speakId;
+  if(settings().voiceMode === 'gemini' && settings().key){
+    const key = (settings().gvoice || 'Kore') + '|' + text;
+    try{
+      let buf = ttsCache.get(key);
+      if(!buf){
+        setStatus('🔊 Le coach prépare sa voix…');
+        buf = await geminiTTS(text);
+        ttsCache.set(key, buf);
+      }
+      if(myId !== speakId) return;   // une autre action a pris le relais
+      playBuffer(buf, mode === 'slow' ? 0.8 : mode === 'clear' ? 0.92 : 1);
+      return;
+    }catch(e){
+      if(myId !== speakId) return;
+      browserSpeak(text, mode);
+      const why = e.status === 429 ? 'quota vocal atteint' : (e.message === 'TIMEOUT' ? 'trop lente' : 'indisponible');
+      setTimeout(() => setStatus('Voix Gemini ' + why + ' : voix du navigateur utilisée pour cette phrase.'), 300);
+      return;
+    }
+  }
+  browserSpeak(text, mode);
+}
+function stopSpeaking(){
+  speakId++;
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  if(currentSrc){ try{ currentSrc.stop(); }catch(e){} currentSrc = null; }
+}
+
+/* ---------- Interface : messages ---------- */
+function setStatus(t){ $('#status').textContent = t; }
+function readyMsg(){ return state.started ? "À vous ! Touchez 🎙️ pour répondre." : "Ouvrez ⚙️ Réglages pour commencer."; }
+function toast(t){ setStatus(t); }
+function scrollDown(){ const c = $('#chat'); c.scrollTop = c.scrollHeight; }
+
+function addUserBubble(text){
+  const d = document.createElement('div'); d.className = 'msg user';
+  const w = document.createElement('div'); w.className = 'who'; w.textContent = 'Vous';
+  const t = document.createElement('div'); t.className = 'text'; t.textContent = text;
+  d.append(w, t); $('#chat').appendChild(d); scrollDown();
+  return d;
+}
+function addCorrections(list, goodPoint){
+  const wrap = document.createElement('div'); wrap.className = 'corr-wrap';
+  if(!list.length){
+    const ok = document.createElement('div'); ok.className = 'ok';
+    ok.textContent = '✓ ' + (goodPoint || 'Rien à corriger, bravo !');
+    wrap.appendChild(ok);
+  }
+  list.forEach(c => {
+    const card = document.createElement('div'); card.className = 'corr' + (c.type === 'prononciation' ? ' pron' : '');
+    const tag = document.createElement('div'); tag.className = 'tag'; tag.textContent = c.type;
+    const line = document.createElement('div'); line.className = 'line';
+    const s = document.createElement('s'); s.textContent = c.said;
+    const b = document.createElement('b'); b.textContent = c.correct;
+    line.append(s, document.createTextNode('  →  '), b);
+    const why = document.createElement('div'); why.className = 'why'; why.textContent = c.explanation;
+    const tools = document.createElement('div'); tools.className = 'tools';
+    const hear = document.createElement('button'); hear.textContent = '🔊 Écouter la forme correcte';
+    hear.onclick = () => { unlockAudio(); speak(c.correct, 'clear'); };
+    tools.appendChild(hear);
+    card.append(tag, line, why, tools); wrap.appendChild(card);
+  });
+  $('#chat').appendChild(wrap); scrollDown();
+}
+function addTutorBubble(text, fr){
+  const d = document.createElement('div'); d.className = 'msg tutor';
+  const w = document.createElement('div'); w.className = 'who'; w.textContent = 'Coach';
+  const t = document.createElement('div'); t.className = 'text'; t.textContent = text;
+  if(!settings().showText){ t.classList.add('hidden-text'); t.title = 'Touchez pour afficher'; t.onclick = () => t.classList.remove('hidden-text'); }
+  const frDiv = document.createElement('div'); frDiv.className = 'fr'; frDiv.textContent = fr || ''; frDiv.style.display = 'none';
+  const tools = document.createElement('div'); tools.className = 'tools';
+  const b1 = document.createElement('button'); b1.textContent = '🔊 Réécouter'; b1.onclick = () => { unlockAudio(); speak(text); };
+  const b2 = document.createElement('button'); b2.textContent = '🐢 Plus lent'; b2.onclick = () => { unlockAudio(); speak(text, 'slow'); };
+  const b3 = document.createElement('button'); b3.textContent = 'FR'; b3.title = 'Traduction';
+  b3.onclick = () => { frDiv.style.display = frDiv.style.display === 'none' ? 'block' : 'none'; t.classList.remove('hidden-text'); };
+  tools.append(b1, b2); if(fr) tools.appendChild(b3);
+  d.append(w, t, frDiv, tools); $('#chat').appendChild(d); scrollDown();
+}
+function addError(text){
+  const d = document.createElement('div'); d.className = 'err'; d.textContent = '⚠️ ' + text;
+  $('#chat').appendChild(d); scrollDown();
+}
+
+/* ---------- Consignes du tuteur ---------- */
+function systemPrompt(){
+  const s = settings();
+  return `You are "Coach", a warm, patient and encouraging English teacher having a SPOKEN conversation with a French-speaking adult learner from Cameroon.
+
+LEARNER LEVEL: ${LEVELS[s.level]}
+SITUATION: ${SCENARIOS[s.scenario].prompt}
+
+HOW TO REPLY ("reply" field — it will be read aloud by a speech synthesizer):
+- 1 to 3 short sentences of natural spoken English. No emojis, no markdown, no lists, no stage directions.
+- Stay in the situation and keep the conversation going: usually end with ONE question.
+- Recasting: when the learner made a mistake, naturally reuse the correct form in your reply (e.g. learner: "Yesterday I go to the market" -> you: "Oh, you went to the market? What did you buy?"). Do not lecture in the reply.
+${s.strict
+  ? '- STRICT MODE: if the learner made an important mistake, start your reply with "Let\'s say it correctly:" followed by the corrected sentence, then ask them to repeat it before continuing.'
+  : '- Never interrupt the flow with explanations; explanations go in the "corrections" field.'}
+- If the learner speaks French or is stuck, help them: give the English way to say it and invite them to try.
+- Adapt vocabulary and sentence length to the learner's level.
+
+CORRECTIONS ("corrections" field):
+- List only real errors from the learner's LAST turn: grammar, vocabulary/word choice, false friends, unnatural phrasing ("tournure"), and clearly wrong pronunciation that changes or blurs the word ("prononciation").
+- Never correct a French/African accent itself, and never correct pronunciation if the turn was typed (no audio).
+- Maximum 3 corrections, most important first. Ignore tiny hesitations.
+- "said": the learner's wrong words; "correct": the corrected words; "explanation": ONE short sentence in FRENCH giving the rule.
+- Pay special attention to typical francophone errors: "I have 30 years" (I am 30), missing third-person -s, "since 3 years" (for 3 years), present instead of past simple, false friends (actually, eventually, assist, library, sensible), "make/do" confusion, "the" with general nouns ("the life is hard"), adjective agreement ("differents"), word order of adjectives, "informations/advices" (uncountable), "people is", silent/pronounced "h", "th" sounds, final -ed endings.
+- If there is nothing to correct, return an empty list and put a short French compliment in "good_point".
+
+OTHER FIELDS:
+- "transcript": exact transcription of what the learner said, KEEPING their mistakes (do not fix them). If the turn was typed, copy it.
+- "reply_fr": French translation of your reply.`;
+}
+
+const TURN_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    transcript: { type: 'STRING' },
+    reply: { type: 'STRING' },
+    reply_fr: { type: 'STRING' },
+    corrections: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          type: { type: 'STRING', enum: ['grammaire', 'vocabulaire', 'tournure', 'prononciation'] },
+          said: { type: 'STRING' },
+          correct: { type: 'STRING' },
+          explanation: { type: 'STRING' }
+        },
+        required: ['type', 'said', 'correct', 'explanation']
+      }
+    },
+    good_point: { type: 'STRING' }
+  },
+  required: ['transcript', 'reply', 'reply_fr', 'corrections'],
+  propertyOrdering: ['transcript', 'corrections', 'good_point', 'reply', 'reply_fr']
+};
+
+const RECAP_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    summary: { type: 'STRING' },
+    strengths: { type: 'ARRAY', items: { type: 'STRING' } },
+    errors: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
+      error: { type: 'STRING' }, correct: { type: 'STRING' }, rule: { type: 'STRING' } }, required: ['error', 'correct', 'rule'] } },
+    exercises: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
+      question: { type: 'STRING' }, answer: { type: 'STRING' } }, required: ['question', 'answer'] } },
+    next_goal: { type: 'STRING' }
+  },
+  required: ['summary', 'strengths', 'errors', 'exercises', 'next_goal']
+};
+
+/* ---------- Appel à l'API Gemini ---------- */
+async function apiError(r){
+  let msg = ''; try{ const j = await r.json(); msg = (j.error && j.error.message) || ''; }catch(e){}
+  const e = new Error(msg || ('HTTP ' + r.status)); e.status = r.status; return e;
+}
+function friendlyError(e){
+  const m = (e && e.message) || '';
+  if(m === 'TIMEOUT') return "Pas de réponse après 60 s : connexion trop lente, ou modèle trop lent. Dans ⚙️, choisissez un modèle « flash » ou « flash-lite », puis recommencez.";
+  if(m === 'NOKEY') return "Ajoutez votre clé d'API dans ⚙️ Réglages.";
+  if(e.status === 400 && /api key/i.test(m)) return "Clé d'API invalide : vérifiez-la dans ⚙️ Réglages.";
+  if(e.status === 403) return "Accès refusé : la clé n'a pas les droits, ou l'API n'est pas disponible dans votre région.";
+  if(e.status === 404) return "Ce modèle n'est pas disponible pour votre clé. Dans ⚙️, touchez « Charger les modèles » : le coach choisira un modèle qui marche.";
+  if(e.status === 429) return "Quota gratuit atteint. Attendez une minute (ou demain si c'est le quota du jour), ou choisissez un autre modèle.";
+  if(e.status >= 500) return "Le service Gemini est surchargé. Réessayez dans quelques secondes.";
+  if(e instanceof TypeError || /fetch|network/i.test(m)) return "Pas de connexion à Internet (ou connexion trop faible).";
+  return "Erreur" + (e.status ? ' ' + e.status : '') + " : " + m.slice(0, 200);
+}
+/* Réduire la « réflexion » des modèles récents : réponses bien plus rapides */
+function thinkingFor(model){
+  if(/gemini-2\.5-(flash|flash-lite)/.test(model)) return { thinkingBudget: 0 };
+  if(/flash/.test(model)) return { thinkingLevel: 'minimal' };
+  return null;
+}
+function parseJSON(txt){
+  try{ return JSON.parse(txt); }catch(e){
+    const m = txt.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); throw new Error('Réponse illisible du modèle.');
+  }
+}
+async function gemini(contents, schema, systemText, temperature){
+  const s = settings();
+  if(!s.key) throw new Error('NOKEY');
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + s.model + ':generateContent';
+  const body = {
+    systemInstruction: { parts: [{ text: systemText }] },
+    contents,
+    generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: temperature ?? 0.7 }
+  };
+  const tc = thinkingFor(s.model);
+  if(tc) body.generationConfig.thinkingConfig = tc;
+  for(let attempt = 0; attempt < 3; attempt++){
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    let r;
+    try{
+      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': s.key }, body: JSON.stringify(body), signal: ctrl.signal });
+    }catch(e){
+      clearTimeout(timer);
+      if(e.name === 'AbortError'){ const t = new Error('TIMEOUT'); throw t; }
+      throw e;
+    }
+    clearTimeout(timer);
+    if(r.ok){
+      const j = await r.json();
+      const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+      const txt = parts.filter(p => p.text && !p.thought).map(p => p.text).join('');
+      if(!txt) throw new Error('Réponse vide (contenu bloqué ?). Reformulez.');
+      return parseJSON(txt);
+    }
+    const err = await apiError(r);
+    if(err.status === 400 && body.generationConfig.thinkingConfig && /think/i.test(err.message)){
+      delete body.generationConfig.thinkingConfig; continue;   // le modèle refuse ce réglage : on réessaie sans
+    }
+    if(err.status >= 500 && attempt === 0){ await sleep(1500); continue; }
+    throw err;
+  }
+}
+
+/* Historique envoyé au modèle (texte seulement, pour économiser les données) */
+function historyContents(){
+  const MAX = 24;
+  let h = state.history;
+  if(h.length > MAX) h = [h[0]].concat(h.slice(h.length - MAX + 1));
+  // Gemini exige l'alternance user/model qui commence par user
+  if(h.length && h[0].role !== 'user') h = h.slice(1);
+  return h.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+}
+
+/* ---------- Déroulé de la séance ---------- */
+async function startSession(){
+  unlockAudio();
+  saveSettings();
+  if(!settings().key){ toast("Collez votre clé d'API d'abord."); return; }
+  closeOverlay('#settingsOverlay');
+  stopSpeaking();
+  state.history = []; state.allCorrections = []; state.started = true;
+  $('#chat').innerHTML = '';
+  const intro = document.createElement('div'); intro.className = 'welcome';
+  intro.innerHTML = '<b>Séance :</b> ';
+  intro.appendChild(document.createTextNode(SCENARIOS[settings().scenario].label + ' · niveau ' + settings().level + (settings().strict ? ' · mode strict' : '') + ' · modèle ' + settings().model));
+  $('#chat').appendChild(intro);
+
+  const opener = '[Session start. Greet me briefly and open the situation with one short question. There is nothing to correct yet.]';
+  setBusy(true, 'Le coach se prépare…');
+  try{
+    const res = await gemini([{ role: 'user', parts: [{ text: opener }] }], TURN_SCHEMA, systemPrompt(), 0.9);
+    state.history.push({ role: 'user', text: opener }, { role: 'model', text: res.reply });
+    addTutorBubble(res.reply, res.reply_fr);
+    speak(res.reply);
+  }catch(e){
+    state.started = false; addError(friendlyError(e));
+  }finally{ setBusy(false); }
+}
+
+async function sendTurn(input){
+  if(state.busy) return;
+  if(!state.started){ await startSession(); if(!state.started) return; }
+  stopSpeaking();
+  const bubble = addUserBubble(input.text || '🎙️ …');
+  setBusy(true, input.audio ? "Le coach écoute votre enregistrement…" : "Le coach lit votre message…");
+  const contents = historyContents();
+  const parts = input.audio
+    ? [{ inlineData: { mimeType: 'audio/wav', data: input.audio } }, { text: '[Spoken turn (audio). Transcribe it exactly in "transcript", correct it and reply.]' }]
+    : [{ text: input.text + '\n[Typed turn: no pronunciation corrections.]' }];
+  contents.push({ role: 'user', parts });
+  try{
+    const res = await gemini(contents, TURN_SCHEMA, systemPrompt());
+    const transcript = input.text || (res.transcript || '').trim() || '(inaudible)';
+    bubble.querySelector('.text').textContent = transcript;
+    const corr = Array.isArray(res.corrections) ? res.corrections.slice(0, 3) : [];
+    addCorrections(corr, res.good_point);
+    state.allCorrections.push(...corr);
+    state.history.push({ role: 'user', text: transcript }, { role: 'model', text: res.reply });
+    addTutorBubble(res.reply, res.reply_fr);
+    speak(res.reply);
+  }catch(e){
+    bubble.remove();
+    addError(friendlyError(e));
+  }finally{ setBusy(false); }
+}
+
+function setBusy(b, msg){
+  state.busy = b;
+  $('#micBtn').classList.toggle('busy', b);
+  $('#micBtn').disabled = b; $('#sendBtn').disabled = b;
+  setStatus(b ? (msg || '…') : readyMsg());
+}
+
+/* ---------- Enregistrement du micro ---------- */
+let mediaStream = null, recorder = null, chunks = [], recStart = 0, recTimer = null;
+const MAX_SEC = 45;
+
+async function toggleRecord(){
+  if(state.busy) return;
+  unlockAudio();
+  if(state.recording) return stopRecord();
+  stopSpeaking();
+  if(!window.isSecureContext){ addError("Le micro exige une page en https (ou ouverte en fichier local)."); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){ addError("Ce navigateur ne permet pas l'enregistrement audio."); return; }
+  if(!settings().key){ openOverlay('#settingsOverlay'); toast("Collez votre clé d'API d'abord."); return; }
+  try{
+    if(!mediaStream || !mediaStream.active){
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    }
+  }catch(e){ addError("Accès au micro refusé. Autorisez le micro dans le navigateur (icône à gauche de l'adresse)."); return; }
+  chunks = [];
+  recorder = new MediaRecorder(mediaStream);
+  recorder.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  recorder.onstop = onRecordStop;
+  recorder.start();
+  state.recording = true; recStart = Date.now();
+  $('#micBtn').classList.add('rec'); $('#micBtn').textContent = '■';
+  recTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - recStart) / 1000);
+    setStatus('🔴 Je vous écoute… ' + s + ' s (touchez ■ pour envoyer)');
+    if(s >= MAX_SEC) stopRecord();
+  }, 250);
+}
+function stopRecord(){
+  if(!state.recording) return;
+  state.recording = false; clearInterval(recTimer);
+  $('#micBtn').classList.remove('rec'); $('#micBtn').textContent = '🎙️';
+  try{ recorder.stop(); }catch(e){}
+}
+async function onRecordStop(){
+  const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+  if((Date.now() - recStart) < 600 || blob.size < 1000){ setStatus("Trop court. Touchez 🎙️, parlez, puis touchez ■."); return; }
+  try{
+    setStatus('Préparation de l\'audio…');
+    const wav = await toWav16k(blob);
+    const b64 = await blobToBase64(wav);
+    await sendTurn({ audio: b64 });
+  }catch(e){
+    addError("Impossible de traiter l'enregistrement : " + e.message);
+    setStatus(readyMsg());
+  }
+}
+
+/* Conversion en WAV mono 16 kHz : format accepté partout et léger */
+async function toWav16k(blob){
+  const buf = await blob.arrayBuffer();
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ac = new AC();
+  const decoded = await ac.decodeAudioData(buf);
+  try{ ac.close(); }catch(e){}
+  const rate = 16000;
+  const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(decoded.duration * rate)), rate);
+  const src = off.createBufferSource(); src.buffer = decoded; src.connect(off.destination); src.start();
+  const rendered = await off.startRendering();
+  return encodeWav(rendered.getChannelData(0), rate);
+}
+function encodeWav(samples, rate){
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const v = new DataView(buffer);
+  const w = (o, s) => { for(let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true); w(8, 'WAVE');
+  w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  let o = 44;
+  for(let i = 0; i < samples.length; i++, o += 2){
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+function blobToBase64(blob){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(',')[1]);
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+
+/* ---------- Bilan de fin de séance ---------- */
+async function showRecap(){
+  openOverlay('#recapOverlay');
+  const body = $('#recapBody');
+  const turns = state.history.filter(m => !m.text.startsWith('[Session start'));
+  if(turns.filter(m => m.role === 'user').length < 2){
+    body.textContent = "Parlez encore un peu avec le coach (au moins 2 échanges) pour obtenir un bilan."; return;
+  }
+  body.textContent = 'Le coach prépare votre bilan…';
+  const s = settings();
+  const transcript = turns.map(m => (m.role === 'user' ? 'LEARNER: ' : 'COACH: ') + m.text).join('\n');
+  const corr = state.allCorrections.map(c => '- [' + c.type + '] "' + c.said + '" -> "' + c.correct + '"').join('\n') || '(none)';
+  const sys = `You are an experienced English teacher writing an end-of-session report IN FRENCH for a French-speaking adult learner from Cameroon (level ${s.level}).
+- "summary": 2-3 encouraging sentences on how the session went.
+- "strengths": 2-3 concrete things the learner did well.
+- "errors": the RECURRING or most important errors (max 5), grouped by rule; "error" and "correct" in English, "rule" in French.
+- "exercises": 4 short practice items targeting those errors (fill-in-the-blank or "correct this sentence"), "question" with the English sentence and a French instruction, "answer" in English.
+- "next_goal": one precise goal for next session, in French.`;
+  try{
+    const res = await gemini([{ role: 'user', parts: [{ text: 'CONVERSATION:\n' + transcript + '\n\nCORRECTIONS NOTED DURING THE SESSION:\n' + corr }] }], RECAP_SCHEMA, sys, 0.4);
+    renderRecap(res);
+  }catch(e){ body.textContent = friendlyError(e); }
+}
+function renderRecap(r){
+  const body = $('#recapBody'); body.innerHTML = '';
+  const el = (tag, text) => { const e = document.createElement(tag); if(text !== undefined) e.textContent = text; return e; };
+  body.appendChild(el('p', r.summary));
+  body.appendChild(el('h3', '💪 Vos points forts'));
+  const ul = el('ul'); (r.strengths || []).forEach(s => ul.appendChild(el('li', s))); body.appendChild(ul);
+  body.appendChild(el('h3', '🎯 Erreurs à travailler'));
+  const ul2 = el('ul');
+  (r.errors || []).forEach(e => {
+    const li = el('li'); const s = el('s', e.error); s.style.color = 'var(--red)';
+    const b = el('b', e.correct); b.style.color = 'var(--green)';
+    li.append(s, document.createTextNode(' → '), b, el('br'), document.createTextNode(e.rule));
+    ul2.appendChild(li);
+  });
+  if(!(r.errors || []).length) ul2.appendChild(el('li', 'Aucune erreur récurrente. Excellent !'));
+  body.appendChild(ul2);
+  body.appendChild(el('h3', '✍️ Exercices (touchez pour voir la réponse)'));
+  (r.exercises || []).forEach((x, i) => {
+    const d = el('details'); const sm = el('summary', (i + 1) + '. ' + x.question);
+    const a = el('p', '✓ ' + x.answer); a.style.margin = '6px 0 0'; a.style.color = 'var(--green)';
+    d.append(sm, a); body.appendChild(d);
+  });
+  body.appendChild(el('h3', '🚀 Objectif pour la prochaine fois'));
+  body.appendChild(el('p', r.next_goal));
+}
+
+/* ---------- Fenêtres ---------- */
+function openOverlay(id){ $(id).classList.remove('hidden'); }
+function closeOverlay(id){ $(id).classList.add('hidden'); }
+
+/* ---------- Branchements ---------- */
+fillScenarios();
+loadSettings();
+populateVoices();
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = populateVoices;
+
+$('#settingsBtn').onclick = () => openOverlay('#settingsOverlay');
+$('#closeSettings').onclick = () => { saveSettings(); closeOverlay('#settingsOverlay'); };
+$('#recapBtn').onclick = showRecap;
+$('#closeRecap').onclick = () => closeOverlay('#recapOverlay');
+$('#loadModels').onclick = loadModels;
+$('#startBtn').onclick = startSession;
+$('#micBtn').onclick = toggleRecord;
+$('#rate').oninput = () => { $('#rateVal').textContent = $('#rate').value; };
+function refreshVoiceUI(){
+  const g = $('#voiceMode').value === 'gemini';
+  $('#gvoiceField').style.display = g ? '' : 'none';
+  $('#browserVoiceRow').style.display = g ? 'none' : '';
+}
+$('#voiceMode').addEventListener('change', refreshVoiceUI);
+$('#testVoice').onclick = () => {
+  unlockAudio(); saveSettings();
+  if(!settings().key){ setupStatus("Collez d'abord votre clé d'API.", false); return; }
+  speak("Hello! I'm your English coach. Shall we practise together today?");
+};
+['#apiKey', '#model', '#level', '#scenario', '#strict', '#showText', '#voice', '#rate', '#voiceMode', '#gvoice'].forEach(id => $(id).addEventListener('change', saveSettings));
+['#settingsOverlay', '#recapOverlay'].forEach(id => $(id).addEventListener('click', e => { if(e.target.id === id.slice(1)) { saveSettings(); closeOverlay(id); } }));
+
+function sendText(){
+  unlockAudio();
+  const t = $('#textInput').value.trim(); if(!t) return;
+  $('#textInput').value = ''; sendTurn({ text: t });
+}
+$('#sendBtn').onclick = sendText;
+$('#textInput').addEventListener('keydown', e => { if(e.key === 'Enter') sendText(); });
+
+document.addEventListener('keydown', e => {
+  if(e.code !== 'Space' || e.repeat) return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if(/INPUT|SELECT|TEXTAREA|BUTTON/.test(tag)) return;
+  if(!$('#settingsOverlay').classList.contains('hidden') || !$('#recapOverlay').classList.contains('hidden')) return;
+  e.preventDefault(); toggleRecord();
+});
+
+refreshVoiceUI();
+if(!settings().key) openOverlay('#settingsOverlay');
+setStatus(readyMsg());
+</script>
+</body>
+</html>
